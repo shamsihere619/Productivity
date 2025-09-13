@@ -22,26 +22,15 @@
     header { background:#28a745; color:white; padding:20px; }
     header h1 { margin:0; font-size:28px; }
     header p { margin:5px 0 0; font-size:16px; }
-    .card { background:white; padding:20px; margin:20px auto; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.15); max-width:650px; }
+    .card { background:white; padding:20px; margin:20px auto; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15); max-width:650px; }
     .card img { border-radius:10px; margin-bottom:15px; }
-    .btn { background:#28a745; color:white; padding:12px 25px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block; margin-top:10px; transition:0.3s; }
+    .btn { background:#28a745; color:white; padding:14px 28px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block; margin-top:10px; transition:0.3s; }
     .btn:hover { background:#1e7e34; }
+    .btn.cta {position:sticky; bottom:20px; z-index:999;}
     footer { margin-top:40px; padding:15px; background:#eee; font-size:14px; }
     footer a { color:#28a745; text-decoration:none; margin:0 5px; }
     footer a:hover { text-decoration:underline; }
   </style>
-
-  <script>
-    // Rotation script for 2 links
-    const links = [
-      "https://otieu.com/4/9647803",
-      "https://otieu.com/4/9647807"
-    ];
-    function getLink(){
-      const i = Math.floor(Math.random() * links.length);
-      window.location.href = links[i];
-    }
-  </script>
 </head>
 <body>
 
@@ -54,83 +43,92 @@
   <h2>⭐ Today's Highlights</h2>
   <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80" alt="Productivity Workspace" width="100%">
   <p>Discover simple ways to enter giveaways and access top utilities & productivity apps.</p>
-  <a href="#" onclick="getLink()" class="btn">Check Now</a>
+  <a href="#" onclick="getLink()" class="btn cta">Check Now</a>
 </div>
 
 <footer>
   <p>
-    <a href="about.html">About Us</a> |
-    <a href="privacy.html">Privacy Policy</a> |
-    <a href="terms.html">Terms of Service</a> |
+    <a href="about.html">About Us</a> | 
+    <a href="privacy.html">Privacy Policy</a> | 
+    <a href="terms.html">Terms of Service</a> | 
     <a href="contact.html">Contact</a>
   </p>
   <p>© 2025 Rewards & Productivity Hub</p>
 </footer>
 
-<!-- Bot Filter + GA4 Event Script -->
+<!-- Random redirect with sessionStorage limit -->
+<script>
+  const links = [
+    "https://otieu.com/4/9647803",
+    "https://otieu.com/4/9647807"
+  ];
+  function getLink(){
+    if(sessionStorage.getItem("clicked")) return;
+    sessionStorage.setItem("clicked",1);
+    const i = Math.floor(Math.random() * links.length);
+    window.location.href = links[i];
+  }
+</script>
+
+<!-- ProPush script with 4s delay -->
+<script>
+  setTimeout(()=>{
+    var s=document.createElement('script');
+    s.src='https://yohle.com/5ba/41452/mw.min.js?z=9857170&sw=/sw-check-permissions-c49ab.js';
+    s.async=true;
+    document.head.appendChild(s);
+  }, 4000);
+</script>
+
+<!-- Bot Filter + GA4 tracking -->
 <script>
 (function(){
-  const TRACKER_URL = null;
-  const DELAY_MS = 2000;
-  const MIN_ACTIVITY = 1;
-  const ctas = Array.from(document.querySelectorAll('.btn'));
-  if (!ctas.length) { if(window.gtag) gtag('event','page_view',{page_path:location.pathname}); return; }
+  const DELAY_MS = 2000, MIN_ACTIVITY = 1;
+  const ctas = Array.from(document.querySelectorAll('.btn, .cta'));
+  if (!ctas.length) return;
 
-  function fingerprint(){ return { ua_short:(navigator.userAgent||'').split(' ').slice(0,6).join(' '), lang:navigator.language||'', vw:window.innerWidth||0, vh:window.innerHeight||0, platform:navigator.platform||'' }; }
-
-  let isBot=false;
-  try{
+  let isBot=false, activityCount=0;
+  try {
     if(navigator.webdriver) isBot=true;
     const ua=navigator.userAgent||'';
     if(/(HeadlessChrome|PhantomJS|puppeteer|bot|crawler|spider|curl|wget)/i.test(ua)) isBot=true;
   } catch(e){}
 
-  let activityCount=0;
-  const markActive=()=>{ activityCount=Math.min(999,activityCount+1); };
+  const markActive=()=>{activityCount=Math.min(999,activityCount+1);};
   ['mousemove','scroll','touchstart','keydown'].forEach(ev=>window.addEventListener(ev,markActive,{passive:true}));
 
-  function safeSend(eventName,extra){
-    if(!TRACKER_URL) return;
-    try{
-      const payload={event:eventName,ts:new Date().toISOString(),page:location.pathname,site:location.hostname,fingerprint:fingerprint(),duration_ms:Date.now()-(window._pageStart||Date.now()),extra:extra||{}};
-      fetch(TRACKER_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
-    }catch(e){}
-  }
-
-  window._pageStart=Date.now();
-
   ctas.forEach(btn=>{
-    try{ btn.dataset._origHref=btn.getAttribute('href')||'#'; btn.setAttribute('href','#'); btn.dataset._disabled='1'; btn.style.pointerEvents='none'; btn.style.opacity='.6'; }catch(e){}
+    btn.dataset._origHref=btn.getAttribute('href')||'#';
+    btn.setAttribute('href','#');
+    btn.dataset._disabled='1';
+    btn.style.pointerEvents='none';
+    btn.style.opacity='.6';
   });
 
   setTimeout(()=>{
     const engaged=activityCount>=MIN_ACTIVITY;
-    if(window.gtag) gtag('event','page_view',{page_path:location.pathname, bot_suspected:isBot?1:0, engaged:engaged?1:0});
-    safeSend('page_view',{bot:isBot?1:0, engaged:engaged?1:0});
-    if(!isBot && engaged){ ctas.forEach(btn=>{ try{ delete btn.dataset._disabled; btn.style.pointerEvents=''; btn.style.opacity=''; }catch(e){} }); }
-    else{ ctas.forEach(btn=>{ try{ btn.style.display='none'; }catch(e){} }); }
-  },DELAY_MS);
+    if(window.gtag) gtag('event','page_view',{bot_suspected:isBot?1:0, engaged:engaged?1:0});
+    if(!isBot && engaged){
+      ctas.forEach(btn=>{
+        delete btn.dataset._disabled;
+        btn.style.pointerEvents='';
+        btn.style.opacity='';
+      });
+    } else {
+      ctas.forEach(btn=>btn.style.display='none');
+    }
+  }, DELAY_MS);
 
   ctas.forEach(btn=>{
-    btn.addEventListener('click',function(ev){
+    btn.addEventListener('click', function(ev){
       ev.preventDefault();
       if(btn.dataset._disabled==='1') return;
       const label=btn.textContent.trim().slice(0,60);
-      if(window.gtag){ gtag('event','cta_click',{event_category:'engagement',event_label:label,value:1}); }
-      safeSend('cta_click',{label:label});
-      setTimeout(()=>{ window.getLink(); },120);
-    },{passive:false});
+      if(window.gtag) gtag('event','cta_click',{event_category:'engagement',event_label:label,value:1});
+      setTimeout(()=>{ if(typeof window.getLink==='function') getLink(); },120);
+    }, {passive:false});
   });
-
 })();
-</script>
-
-<!-- ProPush Script -->
-<script>
-var s = document.createElement('script');
-s.src='//yohle.com/5ba/41452/mw.min.js?z=9857170&sw=/sw-check-permissions-c49ab.js';
-s.async = true;
-document.head.appendChild(s);
 </script>
 
 </body>
